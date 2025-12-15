@@ -3,9 +3,100 @@ from tkinter import ttk, messagebox
 from datetime import datetime, timedelta
 import winsound
 
+# -------------------- App Window --------------------
 window = tk.Tk()
 window.title("Timer")
-window.minsize(width=500, height=500)
+window.geometry("520x520")
+window.minsize(520, 520)
+
+# -------------------- Theme / Style --------------------
+BG = "#0B1220"
+CARD = "#121B2E"
+TEXT = "#E5E7EB"
+MUTED = "#9CA3AF"
+ACCENT = "#60A5FA"
+SUCCESS = "#34D399"
+DANGER = "#F87171"
+
+window.configure(bg=BG)
+
+style = ttk.Style()
+style.theme_use("clam")
+
+# Base
+style.configure(".", background=BG, foreground=TEXT, font=("Segoe UI", 11))
+style.configure("TFrame", background=BG)
+style.configure("Card.TFrame", background=CARD)
+
+style.configure("Title.TLabel", background=CARD, foreground=TEXT, font=("Segoe UI Semibold", 18))
+style.configure("Sub.TLabel", background=CARD, foreground=MUTED, font=("Segoe UI", 10))
+style.configure("Clock.TLabel", background=CARD, foreground=TEXT, font=("Consolas", 40, "bold"))
+style.configure("Timer.TLabel", background=CARD, foreground=TEXT, font=("Consolas", 22, "bold"))
+
+# Buttons
+style.configure(
+    "Primary.TButton",
+    background=ACCENT,
+    foreground="#0B1220",
+    font=("Segoe UI Semibold", 11),
+    padding=(14, 10),
+    borderwidth=0,
+)
+style.map(
+    "Primary.TButton",
+    background=[("active", "#7CB7FF"), ("disabled", "#334155")],
+    foreground=[("disabled", "#94A3B8")],
+)
+
+style.configure(
+    "Success.TButton",
+    background=SUCCESS,
+    foreground="#04120C",
+    font=("Segoe UI Semibold", 11),
+    padding=(14, 10),
+    borderwidth=0,
+)
+style.map("Success.TButton", background=[("active", "#5BE7BE")])
+
+style.configure(
+    "Danger.TButton",
+    background=DANGER,
+    foreground="#1F0A0A",
+    font=("Segoe UI Semibold", 11),
+    padding=(14, 10),
+    borderwidth=0,
+)
+style.map("Danger.TButton", background=[("active", "#FF9A9A")])
+
+style.configure(
+    "Ghost.TButton",
+    background=CARD,
+    foreground=TEXT,
+    font=("Segoe UI", 11),
+    padding=(14, 10),
+    borderwidth=1,
+    relief="solid",
+)
+style.map("Ghost.TButton", background=[("active", "#1B2742")])
+
+# Inputs
+style.configure(
+    "Modern.TSpinbox",
+    fieldbackground="#0F172A",
+    background="#0F172A",
+    foreground=TEXT,
+    bordercolor="#22304A",
+    lightcolor="#22304A",
+    darkcolor="#22304A",
+    padding=(10, 8),
+    arrowsize=14,
+)
+style.map(
+    "Modern.TSpinbox",
+    bordercolor=[("focus", ACCENT)],
+    lightcolor=[("focus", ACCENT)],
+    darkcolor=[("focus", ACCENT)],
+)
 
 pages = {}
 timer_seconds = 0
@@ -21,67 +112,112 @@ def show_page(PageClass):
 
 class Page1(tk.Frame):
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, bg=BG)
 
-        self.time_label = ttk.Label(self, font=("Arial", 30, "roman"))
-        self.time_label.pack(pady=(30, 20))
+        outer = ttk.Frame(self, style="TFrame")
+        outer.pack(fill="both", expand=True, padx=18, pady=18)
 
-        ttk.Button(self, text="Go to Timer", command=lambda: show_page(Page2), width=20).pack(pady=10)
+        card = ttk.Frame(outer, style="Card.TFrame")
+        card.pack(fill="both", expand=True)
+
+        header = ttk.Frame(card, style="Card.TFrame")
+        header.pack(fill="x", padx=22, pady=(22, 8))
+
+        ttk.Label(header, text="Clock", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="Current time (local)", style="Sub.TLabel").pack(anchor="w", pady=(4, 0))
+
+        body = ttk.Frame(card, style="Card.TFrame")
+        body.pack(fill="both", expand=True, padx=22, pady=18)
+
+        self.time_label = ttk.Label(body, style="Clock.TLabel")
+        self.time_label.pack(pady=(24, 18))
+
+        ttk.Button(
+            body,
+            text="Go to Timer",
+            style="Primary.TButton",
+            command=lambda: show_page(Page2),
+        ).pack(pady=(10, 0))
+
+        footer = ttk.Frame(card, style="Card.TFrame")
+        footer.pack(fill="x", padx=22, pady=(0, 22))
+
+        ttk.Label(
+            footer,
+            text="Tip: Press Start after setting the duration.",
+            style="Sub.TLabel",
+        ).pack(anchor="w")
 
         self.update_clock()
 
     def update_clock(self):
-        self.time_label.config(text=f'⏱️ {datetime.now().strftime("%H:%M:%S")}')
+        self.time_label.config(text=datetime.now().strftime("%H:%M:%S"))
         self.after(1000, self.update_clock)
 
 
 class Page2(tk.Frame):
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, bg=BG)
 
-        container = ttk.Frame(self, padding=20)
-        container.grid(row=0, column=0, sticky="nsew")
+        outer = ttk.Frame(self, style="TFrame")
+        outer.pack(fill="both", expand=True, padx=18, pady=18)
 
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
+        card = ttk.Frame(outer, style="Card.TFrame")
+        card.pack(fill="both", expand=True)
 
-        container.columnconfigure((0, 1, 2), weight=1, uniform="col")
-        container.rowconfigure((0, 1, 2, 3, 4, 5), weight=0)
-        container.rowconfigure(6, weight=1)
+        header = ttk.Frame(card, style="Card.TFrame")
+        header.pack(fill="x", padx=22, pady=(22, 8))
 
-        ttk.Label(container, text="Set the Duration", font=("Arial", 16, "roman")).grid(
-            row=0, column=0, columnspan=3, pady=(0, 15)
-        )
+        ttk.Label(header, text="Timer", style="Title.TLabel").pack(anchor="w")
+        ttk.Label(header, text="Set a duration and start the countdown.", style="Sub.TLabel").pack(anchor="w", pady=(4, 0))
 
-        self.hour_spinbox = ttk.Spinbox(container, from_=0, to=24, justify="center", width=6)
-        self.minute_spinbox = ttk.Spinbox(container, from_=0, to=59, justify="center", width=6)
-        self.second_spinbox = ttk.Spinbox(container, from_=0, to=59, justify="center", width=6)
+        body = ttk.Frame(card, style="Card.TFrame")
+        body.pack(fill="both", expand=True, padx=22, pady=18)
 
-        self.hour_spinbox.grid(row=1, column=0, pady=(0, 6))
-        self.minute_spinbox.grid(row=1, column=1, pady=(0, 6))
-        self.second_spinbox.grid(row=1, column=2, pady=(0, 6))
+        inputs = ttk.Frame(body, style="Card.TFrame")
+        inputs.pack(fill="x", pady=(6, 10))
 
-        ttk.Label(container, text="Hours").grid(row=2, column=0, pady=(0, 15))
-        ttk.Label(container, text="Minutes").grid(row=2, column=1, pady=(0, 15))
-        ttk.Label(container, text="Seconds").grid(row=2, column=2, pady=(0, 15))
+        inputs.columnconfigure((0, 1, 2), weight=1, uniform="col")
 
-        self.timer_label = ttk.Label(container, font=("Arial", 18, "roman"))
-        self.timer_label.grid(row=3, column=0, columnspan=3, pady=(0, 18))
+        self.hour_spinbox = ttk.Spinbox(inputs, from_=0, to=24, justify="center", width=8, style="Modern.TSpinbox")
+        self.minute_spinbox = ttk.Spinbox(inputs, from_=0, to=59, justify="center", width=8, style="Modern.TSpinbox")
+        self.second_spinbox = ttk.Spinbox(inputs, from_=0, to=59, justify="center", width=8, style="Modern.TSpinbox")
 
-        self.pause_button = ttk.Button(container, text="Pause", command=self.toggle_pause)
-        self.start_button = ttk.Button(container, text="Start Timer", command=self.start_timer)
-        self.reset_button = ttk.Button(container, text="Reset", command=self.reset_timer)
+        self.hour_spinbox.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        self.minute_spinbox.grid(row=0, column=1, sticky="ew", padx=8)
+        self.second_spinbox.grid(row=0, column=2, sticky="ew", padx=(8, 0))
 
-        self.pause_button.grid(row=4, column=0, pady=10, sticky="ew")
-        self.start_button.grid(row=4, column=1, pady=10, sticky="ew")
-        self.reset_button.grid(row=4, column=2, pady=10, sticky="ew")
+        ttk.Label(inputs, text="Hours", style="Sub.TLabel").grid(row=1, column=0, pady=(8, 0))
+        ttk.Label(inputs, text="Minutes", style="Sub.TLabel").grid(row=1, column=1, pady=(8, 0))
+        ttk.Label(inputs, text="Seconds", style="Sub.TLabel").grid(row=1, column=2, pady=(8, 0))
+
+        self.timer_label = ttk.Label(body, style="Timer.TLabel")
+        self.timer_label.pack(pady=(18, 10))
+
+        buttons = ttk.Frame(body, style="Card.TFrame")
+        buttons.pack(fill="x", pady=(10, 0))
+        buttons.columnconfigure((0, 1, 2), weight=1, uniform="btn")
+
+        self.pause_button = ttk.Button(buttons, text="Pause", style="Ghost.TButton", command=self.toggle_pause)
+        self.start_button = ttk.Button(buttons, text="Start", style="Success.TButton", command=self.start_timer)
+        self.reset_button = ttk.Button(buttons, text="Reset", style="Danger.TButton", command=self.reset_timer)
+
+        self.pause_button.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        self.start_button.grid(row=0, column=1, sticky="ew", padx=8)
+        self.reset_button.grid(row=0, column=2, sticky="ew", padx=(8, 0))
 
         self.pause_button.grid_remove()
         self.reset_button.grid_remove()
 
-        ttk.Button(container, text="Back to Clock", command=lambda: show_page(Page1)).grid(
-            row=5, column=0, columnspan=3, pady=(10, 0), sticky="ew"
-        )
+        footer = ttk.Frame(card, style="Card.TFrame")
+        footer.pack(fill="x", padx=22, pady=(0, 22))
+
+        ttk.Button(
+            footer,
+            text="Back to Clock",
+            style="Primary.TButton",
+            command=lambda: show_page(Page1),
+        ).pack(fill="x")
 
         self.running = False
 
@@ -99,21 +235,20 @@ class Page2(tk.Frame):
             self.timer_label.config(text="Time's up!")
             winsound.Beep(2000, 750)
             self.running = False
+            self.pause_button.config(text="Pause")
 
     def start_timer(self):
         global timer_seconds
-
-        self.running = True
 
         try:
             hours = int(self.hour_spinbox.get() or 0)
             minutes = int(self.minute_spinbox.get() or 0)
             seconds = int(self.second_spinbox.get() or 0)
         except ValueError:
-            return messagebox.showerror(title="Error", message="Please enter numbers only.")
+            return messagebox.showerror("Error", "Please enter numbers only.")
 
         if hours == 0 and minutes == 0 and seconds == 0:
-            return messagebox.showinfo(title="Warning", message="Please set a duration before starting.")
+            return messagebox.showinfo("Warning", "Please set a duration before starting.")
 
         hours = max(0, min(hours, 24))
         minutes = max(0, min(minutes, 59))
@@ -121,9 +256,10 @@ class Page2(tk.Frame):
 
         timer_seconds = int(timedelta(hours=hours, minutes=minutes, seconds=seconds).total_seconds())
 
+        self.running = True
         self.pause_button.grid()
         self.reset_button.grid()
-        self.start_button.config(state=tk.DISABLED)
+        self.start_button.state(["disabled"])
         self.pause_button.config(text="Pause")
 
         self.tick()
@@ -152,7 +288,7 @@ class Page2(tk.Frame):
         self.pause_button.grid_remove()
         self.reset_button.grid_remove()
         self.timer_label.config(text="")
-        self.start_button.config(state=tk.NORMAL)
+        self.start_button.state(["!disabled"])
 
 
 show_page(Page1)
